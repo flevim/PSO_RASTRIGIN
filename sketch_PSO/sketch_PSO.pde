@@ -1,14 +1,14 @@
 // PSO de acuerdo a Talbi (p.247 ss)
 
-PImage surf; // imagen que entrega el fitness
+PImage surf;
 
 // ===============================================================
 int puntos = 100;
-Particle[] fl; // arreglo de partículas
+Particle[] fl; 
 float d = 15; // radio del círculo, solo para despliegue
-float gbestx = 99999, gbesty = 99999, gbest = 99999; // posición y fitness del mejor global
-float w = 900; // inercia: baja (~50): explotación, alta (~5000): exploración (2000 ok)
-float C1 = 70, C2 = 70; // learning factors (C1: own, C2: social) (ok)
+float gbestx = 99999, gbesty = 99999, gbest = 99999; 
+float w = 0.4091; 
+float C1 = 2.1304, C2 = 1.0575; // learning factors (C1: own, C2: social) (ok)
 int evals = 0, evals_to_best = 0; //número de evaluaciones, sólo para despliegue
 float maxv = 4; // max velocidad (modulo)
 float max_rastrigin = -5.12; 
@@ -20,12 +20,11 @@ class Particle{
   float px, py, pfit; // position (p-vector) and fitness (p-fitness) of best solution found by particle so far
   float vx, vy; //vector de avance (v-vector)
   
-  // ---------------------------- Constructor
   Particle(){
-    x = initializePos(); 
-    y = initializePos(); 
-    vx = random(-1,1); vy = random(-1,1);
-    pfit = 999; fit = 999; //asumiendo que no hay valores menores a -1 en la función de evaluación
+    x = initializePos(); //2.56 es una buena inicialización para la posición en X  
+    y = initializePos(); //5.12 es una buena inicialización para la posición en Y
+    vx = random(-1,1); vy = random(-1);
+    pfit = 999; fit = 999; 
   }
   
   float initializePos() {
@@ -33,7 +32,7 @@ class Particle{
   }
   
   float rastrigin(float x, float y) {
-    return 20 + ((x*x) - 10 * cos(2*PI*x)) + ((y*y) - 10 * cos(2*PI*y));
+    return 20 + ((x * x) - 10 * cos(2 * PI * x)) + ((y * y) - 10 * cos(2 * PI * y));
   }
   
   // ---------------------------- Evalúa partícula
@@ -57,13 +56,14 @@ class Particle{
   
   // ------------------------------ mueve la partícula
   void move(){
-    //actualiza velocidad (fórmula con factores de aprendizaje C1 y C2)
-    //vx = vx + random(0,1)*C1*(px - x) + random(0,1)*C2*(gbestx - x);
-    //vy = vy + random(0,1)*C1*(py - y) + random(0,1)*C2*(gbesty - y);
-    //actualiza velocidad (fórmula con inercia, p.250)
-    //vx = w * vx + random(0,1)*(px - x) + random(0,1)*(gbestx - x);
-    //vy = w * vy + random(0,1)*(py - y) + random(0,1)*(gbesty - y);
-    //actualiza velocidad (fórmula mezclada)
+    /*actualiza velocidad (fórmula con factores de aprendizaje C1 y C2)
+    vx = vx + random(0,1)*C1*(px - x) + random(0,1)*C2*(gbestx - x);
+    vy = vy + random(0,1)*C1*(py - y) + random(0,1)*C2*(gbesty - y);
+    actualiza velocidad (fórmula con inercia, p.250)
+    vx = w * vx + random(0,1)*(px - x) + random(0,1)*(gbestx - x);
+    vy = w * vy + random(0,1)*(py - y) + random(0,1)*(gbesty - y);*/
+    
+    //actualiza velocidad (fórmula mezclada) => MEJORES RESULTADOS por esta formula
     vx = w * vx + random(0,1)*C1*(px - x) + random(0,1)*C2*(gbestx - x);
     vy = w * vy + random(0,1)*C1*(py - y) + random(0,1)*C2*(gbesty - y);
     // trunca velocidad a maxv
@@ -72,9 +72,10 @@ class Particle{
       vx = vx/modu*maxv;
       vy = vy/modu*maxv;
     }
-    // update position
+    
     x = x + vx;
     y = y + vy;
+    
     // rebota en murallas
     if (x > width || x < 0) vx = - vx;
     if (y > height || y < 0) vy = - vy;
@@ -89,8 +90,7 @@ class Particle{
     stroke(#ff0000);
     line(x,y,x-10*vx,y-10*vy);
   }
-} //fin de la definición de la clase Particle
-
+} 
 
 // dibuja punto azul en la mejor posición y despliega números
 void despliegaBest(){
@@ -102,7 +102,6 @@ void despliegaBest(){
   text("Best fitness: "+str(gbest)+"\nEvals to best: "+str(evals_to_best)+"\nEvals: "+str(evals),10,20);
 }
 
-// ===============================================================
 
 void setup(){  
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -112,9 +111,7 @@ void setup(){
   size(1024,512); //setea width y height (de acuerdo al tamaño de la imagen)
   surf = loadImage("Moon_LRO_LOLA_global_LDEM_1024_b.jpg");
   
-  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   smooth();
-  // crea arreglo de objetos partículas
   fl = new Particle[puntos];
   for(int i =0;i<puntos;i++)
     fl[i] = new Particle();
@@ -127,8 +124,8 @@ void draw(){
   for(int i = 0;i<puntos;i++){
     fl[i].display();
   }
+  
   despliegaBest();
-  //mueve puntos
   for(int i = 0;i<puntos;i++){
     fl[i].move();
     fl[i].Eval(surf);
