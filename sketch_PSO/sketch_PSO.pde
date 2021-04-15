@@ -24,7 +24,7 @@ class Particle{
   Particle(){
     x = initializePos(); //2.56 es una buena inicialización para la posición en X  
     y = initializePos(); //5.12 es una buena inicialización para la posición en Y
-    vx = random(-1,1); vy = random(-1);
+    vx = random(-1,1); vy = random(-1,1);
     pfit = 999; fit = 999; 
   }
   
